@@ -1,6 +1,7 @@
 const Category = require('../models/categorySchema')
 const SubCategory = require('../models/subCategorySchema')
-const mypromise = require("../utils/promise");
+const mypromise = require("../utils/mypromise");
+
 
 
 // can create Category
@@ -86,6 +87,23 @@ let getAllSubCategory = async (req,res)=>{
       data: subcategory
   })
 }
+let getAllOwnerWiseCategory = async (req,res) => {
+  let {id}= req.params
+  let allOwnerWiseCategory = await mypromise(id)
+  if(!allOwnerWiseCategory || allOwnerWiseCategory.length === 0 ){
+    return res.status(404).json({
+      success: false,
+      message: "Category not found"
+    })
+  }
+  return res.status(200).json({
+    success: true,
+    message: "All Categories..",
+    category : allOwnerWiseCategory
+  })
+  
+}
+
 // get One category under All subcategory /which category have how much subcategory
 let getAllCategoryWiseSubCategory = async (req,res)=>{
   let {id}= req.params
@@ -108,39 +126,6 @@ let getAllCategoryWiseSubCategory = async (req,res)=>{
       data: subcategory
   })
 } 
-// getAllOwnerWiseCategory 
-// let getAllOwnerWiseCategory = async(req,res)=>{
-//   // promise start
-//   let { id } = req.params
-//   let data = await Category.find({owner: id}).lean()
- 
-//   mypromise(data).then((value) => {
-//       res.status(200).json({
-//       success: true,
-//       message: "All Category",
-//       data: value
-//     });
-//   });
-// } 
-
-let getAllOwnerWiseCategory = async(req,res)=>{
-  try{
-   const data = await Category.find({owner: id}).lean()
-   const result = await mypromise(data)
-   return res.status(200).json({
-       success: true,
-       message: "All Category",
-       data: result
-   })
-  }catch(erro){
-    // next(erro.message)
-    return res.status(500).json({
-      success: false,
-      message: "Server Error: Unable to fetch categories",
-      error: erro.message
-    });
-  }
-}
 
 
 
@@ -149,5 +134,8 @@ let getAllOwnerWiseCategory = async(req,res)=>{
 
 
 
-module.exports = {createCategory,getAllCategory,createSubCategory,getAllSubCategory,getAllCategoryWiseSubCategory,getAllOwnerWiseCategory}
+
+
+
+module.exports = {createCategory,getAllCategory,createSubCategory,getAllSubCategory,getAllOwnerWiseCategory,getAllOwnerWiseCategory,getAllCategoryWiseSubCategory}
 

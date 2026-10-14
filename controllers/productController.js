@@ -1,4 +1,9 @@
-let Product = require('../models/productSchema')
+const mongoose = require('mongoose')
+const Category = require('../models/categorySchema')
+const SubCategory = require('../models/subCategorySchema')
+const Product = require('../models/productSchema')
+
+
 
 let createProduct = async(req,res)=>{
   let { title,description,shortDescription,price,discountPrice,category,subCategory,isMain,owner}= req.body
@@ -66,10 +71,54 @@ res.status(200).json({
   product: product
 })
 }
-// can get onwerwise Category
-
-
-
+// can get product onwerwise Category
+let getProductOwnerWiseCategory = async(req,res)=>{
+  const {categoryId}= req.params
+  if(!mongoose.Types.ObjectId.isValid(categoryId)){
+    return res.status(400).json({
+      success: false,
+      message: "Valid Caregory id is required"
+    })
+  }
+  const category = await Category.findById(categoryId).select('_id name').lean()
+  if(!category){
+     return res.status(404).json({
+      success: false,
+      message: "Caregory not found"
+    })
+  }
+  const productCount = await Product.countDocuments({category: categoryId }).lean()
+  return res.status(200).json({
+    success: true,
+    message: `product count category "${category.name}"`,
+    category: category,
+    productCount: productCount
+  })
+}
+// can get product ownerwise subCategory
+let getProductOwnerWiseSubCategory = async (req,res)=>{
+  const {subCategoryId} = req.params
+   if (!mongoose.Types.ObjectId.isValid(subCategoryId)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid subcategory id is required'
+      })
+    }
+  const subCategory = await SubCategory.findById(subCategoryId).select('_id name').lean()
+    if(!subCategory){
+      return res.status(404).json({
+        success: false,
+        message: "Sub Category not found"
+      })
+    }
+    const ProductCount = await Product.countDocuments({subCategory: subCategoryId})
+    return res.status(200).json({
+      success: true,
+      message: `Product count of subcategory "${subCategory.name}"`,
+      subCategory: subCategory,
+      ProductCount: ProductCount
+    })
+}
 // can delete one product by id
 let deleteProduct = async (req,res)=>{
   try {
@@ -106,4 +155,4 @@ let deleteProduct = async (req,res)=>{
 
 
 
-module.exports= {createProduct,getAllProduct,deleteProduct}
+module.exports= {createProduct,getAllProduct,getProductOwnerWiseCategory,getProductOwnerWiseSubCategory,deleteProduct}
